@@ -1,10 +1,11 @@
 import { CheckCircle2 } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
-import { guardStep, ORDER_COMPLETE_LEVEL } from '@/lib/cart'
+import { guardStep, ORDER_COMPLETE_LEVEL, requireCart } from '@/lib/cart'
 
 export default async function OrderCompletePage() {
-  // Terminal page: requires payment to have been completed, but it is NOT part
-  // of the stepper — from here the visitor can only return to the home page.
+  // Guard: cart must exist, and visitor must have completed the full flow
+  // (payment submitted). This is the terminal page with no stepper.
+  await requireCart()
   await guardStep(ORDER_COMPLETE_LEVEL)
 
   return (

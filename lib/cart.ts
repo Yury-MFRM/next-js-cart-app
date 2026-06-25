@@ -7,7 +7,7 @@ import { redirect } from 'next/navigation'
 
 export type ProductKey = 'headphones' | 'sneakers' | 'watch' | 'backpack'
 
-export type Product = {
+export type ProductBase = {
   key: ProductKey
   name: string
   /** Unit price in whole dollars. */
@@ -18,9 +18,14 @@ export type Product = {
   imagePath: string
 }
 
+export type Product = ProductBase & {
+  /** Quantity of this product in the cart. */
+  quantity: number
+}
+
 // All 4 names + relative paths are hardcoded, matching the storefront catalog
 // served at https://browse-flax.vercel.app.
-export const PRODUCTS: Record<ProductKey, Product> = {
+export const PRODUCTS: Record<ProductKey, ProductBase> = {
   headphones: {
     key: 'headphones',
     name: 'Wireless Headphones',
@@ -60,31 +65,62 @@ const TAX_RATE = 0.08
 
 /** Derives the order totals from the products currently in the cart. */
 export function getOrderTotals(products: Product[]) {
-  const count = products.length
-  const subtotal = products.reduce((sum, p) => sum + p.price, 0)
+  const count = products.reduce((sum, p) => sum + p.quantity, 0)
+  const subtotal = products.reduce((sum, p) => sum + p.price * p.quantity, 0)
   const tax = subtotal * TAX_RATE
   const total = subtotal + tax
   return { count, subtotal, tax, total }
 }
 
 export const CART_ITEMS_COOKIE = 'cart_items'
-export const DEFAULT_CART_ITEMS: ProductKey[] = [
-  'headphones',
-  'sneakers',
-  'watch',
-  'backpack',
-]
 
-/** Reads the `cart_items` cookie and resolves it to real product records. */
+/**
+ * Reads the `cart_items` cookie and resolves it to real product records with quantities.
+ *
+ * Format: "name:qty,name:qty,...". If qty is omitted, defaults to 1.
+ * Items with qty <= 0 are filtered out. Duplicates are deduplicated (last qty wins).
+ *
+ * There is intentionally NO default: the cookie is assumed to be provided by
+ * the storefront. When it's missing or empty, the cart is genuinely empty and
+ * we return an empty array so callers can render the empty-cart experience.
+ */
 export async function getCartProducts(): Promise<Product[]> {
   const cookieStore = await cookies()
   const raw = cookieStore.get(CART_ITEMS_COOKIE)?.value
-  const keys = (raw ? raw.split(',') : DEFAULT_CART_ITEMS)
-    .map((k) => k.trim())
-    .filter((k): k is ProductKey => k in PRODUCTS)
+  if (!raw) return []
 
-  const unique = Array.from(new Set(keys.length ? keys : DEFAULT_CART_ITEMS))
-  return unique.map((k) => PRODUCTS[k])
+  const itemMap = new Map<ProductKey, number>()
+
+  raw
+    .split(',')
+    .map((item) => item.trim())
+    .forEach((item) => {
+      const [key, qtyStr] = item.split(':')
+      const cleanKey = key.trim()
+      if (cleanKey in PRODUCTS) {
+        const qty = qtyStr ? Number.parseInt(qtyStr, 10) : 1
+        const validQty = Number.isNaN(qty) || qty <= 0 ? 1 : qty
+        itemMap.set(cleanKey as ProductKey, validQty)
+      }
+    })
+
+  return Array.from(itemMap.entries()).map(([key, quantity]) => ({
+    ...PRODUCTS[key],
+    quantity,
+  }))
+}
+
+/**
+ * Guard for every checkout page EXCEPT the cart itself: if the cart is empty
+ * (no `cart_items` cookie), there is nothing to check out, so send the visitor
+ * to /cart where the empty-cart experience is shown.
+ */
+export async function requireCart(): Promise<Product[]> {
+  const products = await getCartProducts()
+  if (products.length === 0) {
+    redirect(await cartUrl('/'))
+  }
+  return products
 }
 
 /* -------------------------------------------------------------------------- */
@@ -179,6 +215,36 @@ export async function guardStep(stepIndex: number): Promise<number> {
   return progress
 }
 
+/**
+ * Guard for the cart page (step 0): there is a cart (checked via requireCart),
+ * so also render the stepper and track progress from here onward.
+ */
+export async function requireStepCart(): Promise<number> {
+  await requireCart()
+  return guardStep(0)
+}
+
+/**
+ * Guard for the checkout page (step 1): the visitor must have already started
+ * the checkout flow (a cart must exist, and they must have moved past the cart
+ * page). Direct links to /checkout without visiting /cart first redirect to
+ * /cart or the furthest unlocked step.
+ */
+export async function requireStepCheckout(): Promise<number> {
+  await requireCart()
+  return guardStep(1)
+}
+
+/**
+ * Guard for the payment page (step 2): the visitor must have already moved past
+ * the checkout step. Direct links to /payment redirect to the furthest unlocked
+ * step (cart or checkout).
+ */
+export async function requireStepPayment(): Promise<number> {
+  await requireCart()
+  return guardStep(2)
+}
+
 /** Advances progress to at least `stepIndex` and stores it in the cookie. */
 export async function advanceProgress(stepIndex: number): Promise<void> {
   const cookieStore = await cookies()
@@ -189,4 +255,45 @@ export async function advanceProgress(stepIndex: number): Promise<void> {
     httpOnly: true,
     sameSite: 'lax',
   })
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Cart quantity updates                                                     */
+/* -------------------------------------------------------------------------- */
+
+/** Serializes the cart items to the cookie format: "key:qty,key:qty,..." */
+function serializeCart(items: Map<ProductKey, number>): string {
+  return Array.from(items.entries())
+    .filter(([, qty]) => qty > 0)
+    .map(([key, qty]) => (qty === 1 ? key : `${key}:${qty}`))
+    .join(',')
+}
+
+/**
+ * Updates the quantity of a product in the cart.
+ * If qty becomes <= 0, the item is removed from the cart.
+ * Returns the updated cart string for the cookie.
+ */
+export async function updateCartItemQuantity(
+  productKey: ProductKey,
+  newQuantity: number
+): Promise<string> {
+  const products = await getCartProducts()
+  const itemMap = new Map(products.map((p) => [p.key, p.quantity]))
+
+  if (newQuantity <= 0) {
+    itemMap.delete(productKey)
+  } else {
+    itemMap.set(productKey, newQuantity)
+  }
+
+  const cartString = serializeCart(itemMap)
+  const cookieStore = await cookies()
+  cookieStore.set(CART_ITEMS_COOKIE, cartString, {
+    path: '/cart',
+    sameSite: 'lax',
+    maxAge: 60 * 60 * 24 * 7,
+  })
+
+  return cartString
 }

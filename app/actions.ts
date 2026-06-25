@@ -1,7 +1,7 @@
 'use server'
 
 import { redirect } from 'next/navigation'
-import { advanceProgress, cartUrl } from '@/lib/cart'
+import { advanceProgress, cartUrl, type ProductKey, updateCartItemQuantity } from '@/lib/cart'
 
 // Each action simulates submitting the current step's data, records progress in
 // the cookie, and redirects to the next step. We redirect to an absolute,
@@ -22,4 +22,8 @@ export async function proceedToPayment() {
 export async function submitOrder() {
   await advanceProgress(3)
   redirect(await cartUrl('/ordercomplete'))
+}
+
+export async function updateItemQuantity(productKey: ProductKey, quantity: number): Promise<void> {
+  await updateCartItemQuantity(productKey, quantity)
 }

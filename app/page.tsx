@@ -1,12 +1,25 @@
 import { CartItems } from '@/components/cart-items'
+import { EmptyCart } from '@/components/empty-cart'
 import { OrderSummary } from '@/components/order-summary'
 import { Stepper } from '@/components/stepper'
 import { SubmitButton } from '@/components/submit-button'
-import { guardStep } from '@/lib/cart'
+import { getCartProducts, requireStepCart } from '@/lib/cart'
 import { proceedToCheckout } from './actions'
 
 export default async function CartPage() {
-  const progress = await guardStep(0)
+  const products = await getCartProducts()
+
+  // No cart cookie / empty cart: show the empty-cart experience with no stepper
+  // and a single link back to the storefront home.
+  if (products.length === 0) {
+    return (
+      <main className="mx-auto w-full max-w-2xl px-6 py-12">
+        <EmptyCart />
+      </main>
+    )
+  }
+
+  const progress = await requireStepCart()
 
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-12">
