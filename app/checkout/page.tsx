@@ -2,10 +2,12 @@ import { CustomerInfo } from '@/components/customer-info'
 import { OrderSummary } from '@/components/order-summary'
 import { Stepper } from '@/components/stepper'
 import { SubmitButton } from '@/components/submit-button'
-import { guardStep } from '@/lib/cart'
+import { guardStep, requireCart } from '@/lib/cart'
 import { proceedToPayment } from '../actions'
 
 export default async function CheckoutPage() {
+  // No cart cookie: nothing to check out, so redirect to /cart (empty state).
+  await requireCart()
   const progress = await guardStep(1)
 
   return (

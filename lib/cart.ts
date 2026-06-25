@@ -68,23 +68,39 @@ export function getOrderTotals(products: Product[]) {
 }
 
 export const CART_ITEMS_COOKIE = 'cart_items'
-export const DEFAULT_CART_ITEMS: ProductKey[] = [
-  'headphones',
-  'sneakers',
-  'watch',
-  'backpack',
-]
 
-/** Reads the `cart_items` cookie and resolves it to real product records. */
+/**
+ * Reads the `cart_items` cookie and resolves it to real product records.
+ *
+ * There is intentionally NO default: the cookie is assumed to be provided by
+ * the storefront. When it's missing or empty, the cart is genuinely empty and
+ * we return an empty array so callers can render the empty-cart experience.
+ */
 export async function getCartProducts(): Promise<Product[]> {
   const cookieStore = await cookies()
   const raw = cookieStore.get(CART_ITEMS_COOKIE)?.value
-  const keys = (raw ? raw.split(',') : DEFAULT_CART_ITEMS)
+  if (!raw) return []
+
+  const keys = raw
+    .split(',')
     .map((k) => k.trim())
     .filter((k): k is ProductKey => k in PRODUCTS)
 
-  const unique = Array.from(new Set(keys.length ? keys : DEFAULT_CART_ITEMS))
+  const unique = Array.from(new Set(keys))
   return unique.map((k) => PRODUCTS[k])
+}
+
+/**
+ * Guard for every checkout page EXCEPT the cart itself: if the cart is empty
+ * (no `cart_items` cookie), there is nothing to check out, so send the visitor
+ * to /cart where the empty-cart experience is shown.
+ */
+export async function requireCart(): Promise<Product[]> {
+  const products = await getCartProducts()
+  if (products.length === 0) {
+    redirect(await cartUrl('/'))
+  }
+  return products
 }
 
 /* -------------------------------------------------------------------------- */
