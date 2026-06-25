@@ -2,13 +2,12 @@ import { CustomerInfo } from '@/components/customer-info'
 import { OrderSummary } from '@/components/order-summary'
 import { Stepper } from '@/components/stepper'
 import { SubmitButton } from '@/components/submit-button'
-import { guardStep, requireCart } from '@/lib/cart'
+import { requireStepCheckout } from '@/lib/cart'
 import { proceedToPayment } from '../actions'
 
 export default async function CheckoutPage() {
-  // No cart cookie: nothing to check out, so redirect to /cart (empty state).
-  await requireCart()
-  const progress = await guardStep(1)
+  // Guard: cart must exist and visitor must have reached this step via normal flow.
+  const progress = await requireStepCheckout()
 
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-12">

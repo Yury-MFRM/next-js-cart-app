@@ -3,10 +3,9 @@ import { buttonVariants } from '@/components/ui/button'
 import { guardStep, ORDER_COMPLETE_LEVEL, requireCart } from '@/lib/cart'
 
 export default async function OrderCompletePage() {
-  // No cart cookie: redirect to /cart (empty state).
+  // Guard: cart must exist, and visitor must have completed the full flow
+  // (payment submitted). This is the terminal page with no stepper.
   await requireCart()
-  // Terminal page: requires payment to have been completed, but it is NOT part
-  // of the stepper — from here the visitor can only return to the home page.
   await guardStep(ORDER_COMPLETE_LEVEL)
 
   return (

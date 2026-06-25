@@ -195,6 +195,36 @@ export async function guardStep(stepIndex: number): Promise<number> {
   return progress
 }
 
+/**
+ * Guard for the cart page (step 0): there is a cart (checked via requireCart),
+ * so also render the stepper and track progress from here onward.
+ */
+export async function requireStepCart(): Promise<number> {
+  await requireCart()
+  return guardStep(0)
+}
+
+/**
+ * Guard for the checkout page (step 1): the visitor must have already started
+ * the checkout flow (a cart must exist, and they must have moved past the cart
+ * page). Direct links to /checkout without visiting /cart first redirect to
+ * /cart or the furthest unlocked step.
+ */
+export async function requireStepCheckout(): Promise<number> {
+  await requireCart()
+  return guardStep(1)
+}
+
+/**
+ * Guard for the payment page (step 2): the visitor must have already moved past
+ * the checkout step. Direct links to /payment redirect to the furthest unlocked
+ * step (cart or checkout).
+ */
+export async function requireStepPayment(): Promise<number> {
+  await requireCart()
+  return guardStep(2)
+}
+
 /** Advances progress to at least `stepIndex` and stores it in the cookie. */
 export async function advanceProgress(stepIndex: number): Promise<void> {
   const cookieStore = await cookies()
