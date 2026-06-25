@@ -1,6 +1,6 @@
-import { Button } from '@/components/ui/button'
-import { CartItems } from '@/components/cart-items'
+import { OrderSummary } from '@/components/order-summary'
 import { Stepper } from '@/components/stepper'
+import { SubmitButton } from '@/components/submit-button'
 import { guardStep } from '@/lib/cart'
 import { submitOrder } from '../actions'
 
@@ -15,15 +15,26 @@ export default async function PaymentPage() {
         Payment
       </h1>
       <p className="mb-6 text-sm text-muted-foreground">
-        This is a simulation — no payment details are processed.
+        Enter your card details below. This is a simulation — nothing is charged.
       </p>
 
-      <CartItems />
+      {/* Simulated hosted payment field, embedded as an iframe like a real
+          payment provider. The /cart basePath is included explicitly because
+          a raw iframe src is not rewritten by Next.js. */}
+      <div className="overflow-hidden rounded-lg border border-border">
+        <iframe
+          title="Payment details"
+          src="/cart/payment/frame"
+          className="h-80 w-full"
+        />
+      </div>
+
+      <div className="mt-6">
+        <OrderSummary />
+      </div>
 
       <form action={submitOrder} className="mt-8 flex justify-end">
-        <Button type="submit" size="lg">
-          Submit order
-        </Button>
+        <SubmitButton>Submit order</SubmitButton>
       </form>
     </main>
   )

@@ -1,6 +1,7 @@
-import { Button } from '@/components/ui/button'
-import { CartItems } from '@/components/cart-items'
+import { CustomerInfo } from '@/components/customer-info'
+import { OrderSummary } from '@/components/order-summary'
 import { Stepper } from '@/components/stepper'
+import { SubmitButton } from '@/components/submit-button'
 import { guardStep } from '@/lib/cart'
 import { proceedToPayment } from '../actions'
 
@@ -15,15 +16,16 @@ export default async function CheckoutPage() {
         Checkout
       </h1>
       <p className="mb-6 text-sm text-muted-foreground">
-        Review the items below, then continue to payment.
+        Enter your details, then continue to payment.
       </p>
 
-      <CartItems />
-
-      <form action={proceedToPayment} className="mt-8 flex justify-end">
-        <Button type="submit" size="lg">
-          Continue to payment
-        </Button>
+      {/* Customer info is part of the action form (simulation, not processed). */}
+      <form action={proceedToPayment} className="flex flex-col gap-6">
+        <CustomerInfo />
+        <OrderSummary />
+        <div className="flex justify-end">
+          <SubmitButton>Continue to payment</SubmitButton>
+        </div>
       </form>
     </main>
   )

@@ -10,7 +10,8 @@ export type ProductKey = 'headphones' | 'sneakers' | 'watch' | 'backpack'
 export type Product = {
   key: ProductKey
   name: string
-  price: string
+  /** Unit price in whole dollars. */
+  price: number
   /** Relative path to the product detail page on the storefront. */
   productPath: string
   /** Relative path to the product image on the storefront. */
@@ -23,31 +24,47 @@ export const PRODUCTS: Record<ProductKey, Product> = {
   headphones: {
     key: 'headphones',
     name: 'Wireless Headphones',
-    price: '$199',
+    price: 199,
     productPath: '/headphones',
     imagePath: '/products/headphones.png',
   },
   sneakers: {
     key: 'sneakers',
     name: 'Everyday Sneakers',
-    price: '$120',
+    price: 120,
     productPath: '/sneakers',
     imagePath: '/products/sneakers.png',
   },
   watch: {
     key: 'watch',
     name: 'Classic Watch',
-    price: '$249',
+    price: 249,
     productPath: '/watch',
     imagePath: '/products/watch.png',
   },
   backpack: {
     key: 'backpack',
     name: 'Canvas Backpack',
-    price: '$89',
+    price: 89,
     productPath: '/backpack',
     imagePath: '/products/backpack.png',
   },
+}
+
+/** Formats a dollar amount, e.g. 199 -> "$199.00". */
+export function formatMoney(amount: number): string {
+  return `$${amount.toFixed(2)}`
+}
+
+const TAX_RATE = 0.08
+
+/** Derives the order totals from the products currently in the cart. */
+export function getOrderTotals(products: Product[]) {
+  const count = products.length
+  const subtotal = products.reduce((sum, p) => sum + p.price, 0)
+  const tax = subtotal * TAX_RATE
+  const total = subtotal + tax
+  return { count, subtotal, tax, total }
 }
 
 export const CART_ITEMS_COOKIE = 'cart_items'
@@ -101,14 +118,17 @@ export type Step = {
   label: string
 }
 
-// Ordered list of checkout steps. The index is the "level" stored in the
-// progress cookie.
+// Ordered list of checkout steps shown in the stepper. The index is the "level"
+// stored in the progress cookie. `ordercomplete` is intentionally NOT a step —
+// it's a terminal page (level 3) with no stepper, only a link home.
 export const STEPS: Step[] = [
   { path: '/', label: 'Cart' },
   { path: '/checkout', label: 'Checkout' },
   { path: '/payment', label: 'Payment' },
-  { path: '/ordercomplete', label: 'Complete' },
 ]
+
+/** Level of the terminal order-complete page (one beyond the last stepper step). */
+export const ORDER_COMPLETE_LEVEL = STEPS.length // 3
 
 export const PROGRESS_COOKIE = 'cart_progress'
 
@@ -118,7 +138,7 @@ export async function getProgress(): Promise<number> {
   const raw = cookieStore.get(PROGRESS_COOKIE)?.value
   const value = raw ? Number.parseInt(raw, 10) : 0
   if (Number.isNaN(value) || value < 0) return 0
-  return Math.min(value, STEPS.length - 1)
+  return Math.min(value, ORDER_COMPLETE_LEVEL)
 }
 
 /**

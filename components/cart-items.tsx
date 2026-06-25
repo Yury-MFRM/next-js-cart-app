@@ -1,4 +1,10 @@
-import { absoluteUrl, getCartProducts, getCdnOrigin, type Product } from '@/lib/cart'
+import {
+  absoluteUrl,
+  formatMoney,
+  getCartProducts,
+  getCdnOrigin,
+  type Product,
+} from '@/lib/cart'
 
 /**
  * Server component that renders the products in the cart. Image sources and
@@ -47,7 +53,9 @@ function CartRow({ product, origin }: { product: Product; origin: string }) {
         </a>
         <p className="text-sm text-muted-foreground">Qty 1</p>
       </div>
-      <span className="font-medium text-foreground">{product.price}</span>
+      <span className="font-medium text-foreground">
+        {formatMoney(product.price)}
+      </span>
     </li>
   )
 }

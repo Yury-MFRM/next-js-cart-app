@@ -1,15 +1,14 @@
 import { CheckCircle2 } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
-import { Stepper } from '@/components/stepper'
-import { guardStep } from '@/lib/cart'
+import { guardStep, ORDER_COMPLETE_LEVEL } from '@/lib/cart'
 
 export default async function OrderCompletePage() {
-  const progress = await guardStep(3)
+  // Terminal page: requires payment to have been completed, but it is NOT part
+  // of the stepper — from here the visitor can only return to the home page.
+  await guardStep(ORDER_COMPLETE_LEVEL)
 
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-12">
-      <Stepper current={3} progress={progress} />
-
       <div className="flex flex-col items-center rounded-lg border border-border bg-card px-6 py-12 text-center">
         <CheckCircle2 className="mb-4 h-12 w-12 text-primary" aria-hidden="true" />
         <h1 className="mb-2 text-2xl font-semibold tracking-tight text-balance">
