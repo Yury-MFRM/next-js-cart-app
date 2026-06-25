@@ -5,6 +5,7 @@ import {
   getCdnOrigin,
   type Product,
 } from '@/lib/cart'
+import { QuantityCounter } from '@/components/quantity-counter'
 
 /**
  * Server component that renders the products in the cart. Image sources and
@@ -27,6 +28,7 @@ export async function CartItems() {
 function CartRow({ product, origin }: { product: Product; origin: string }) {
   const productUrl = absoluteUrl(origin, product.productPath)
   const imageUrl = absoluteUrl(origin, product.imagePath)
+  const lineTotal = formatMoney(product.price * product.quantity)
 
   return (
     <li className="flex items-center gap-4 p-4">
@@ -51,11 +53,16 @@ function CartRow({ product, origin }: { product: Product; origin: string }) {
         >
           {product.name}
         </a>
-        <p className="text-sm text-muted-foreground">Qty 1</p>
+        <div className="mt-2 flex items-center gap-4">
+          <QuantityCounter productKey={product.key} initialQuantity={product.quantity} />
+        </div>
       </div>
-      <span className="font-medium text-foreground">
-        {formatMoney(product.price)}
-      </span>
+      <div className="flex flex-col items-end gap-1">
+        <span className="text-xs text-muted-foreground">
+          {formatMoney(product.price)} each
+        </span>
+        <span className="font-semibold text-foreground">{lineTotal}</span>
+      </div>
     </li>
   )
 }
