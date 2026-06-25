@@ -108,6 +108,29 @@ export function absoluteUrl(origin: string, path: string): string {
   return `${origin}${path.startsWith('/') ? '' : '/'}${path}`
 }
 
+/** The basePath this sub-web is mounted at (kept in sync with next.config). */
+export const BASE_PATH = '/cart'
+
+/**
+ * Builds an absolute, user-facing URL to a page INSIDE this /cart sub-web.
+ *
+ * We redirect to absolute URLs (rather than bare paths) on purpose: `redirect()`
+ * behind the CDN/proxy can drop the basePath, leaving a bare `/checkout` that
+ * the next.config `fallback` rewrite then proxies to the storefront → 404.
+ * An absolute URL is never basePath-prefixed and never hits the fallback rewrite,
+ * so the visitor reliably lands on `<origin>/cart/<step>`.
+ *
+ * `step` is relative to the basePath (e.g. "/checkout", or "/" for the cart).
+ */
+export async function cartUrl(step: string): Promise<string> {
+  const origin = await getCdnOrigin()
+  // No origin header (rare): return the bare step so redirect() prepends the
+  // basePath itself — avoids a double `/cart/cart` prefix.
+  if (!origin) return step
+  const path = step === '/' ? BASE_PATH : `${BASE_PATH}${step}`
+  return `${origin}${path}`
+}
+
 /* -------------------------------------------------------------------------- */
 /*  Checkout steps + progress guard                                           */
 /* -------------------------------------------------------------------------- */
@@ -149,7 +172,9 @@ export async function getProgress(): Promise<number> {
 export async function guardStep(stepIndex: number): Promise<number> {
   const progress = await getProgress()
   if (stepIndex > progress) {
-    redirect(STEPS[progress].path)
+    // Redirect to an absolute user-facing URL so the basePath survives the
+    // CDN/proxy and the bare path never hits the storefront fallback rewrite.
+    redirect(await cartUrl(STEPS[progress].path))
   }
   return progress
 }
