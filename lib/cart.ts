@@ -1,8 +1,16 @@
-import { cookies, headers } from 'next/headers'
+import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { BASE_PATH } from '@/lib/paths'
+import {
+  getCartId,
+  loadCart,
+  loadCartForVisitor,
+  saveCart,
+  type CartRecord,
+} from '@/lib/cart-store'
 
 export { BASE_PATH, assetPath, apiPath } from '@/lib/paths'
+export { CART_ID_COOKIE } from '@/lib/cart-store'
 
 /* -------------------------------------------------------------------------- */
 /*  Products                                                                  */
@@ -75,48 +83,28 @@ export function getOrderTotals(products: Product[]) {
   return { count, subtotal, tax, total }
 }
 
-export const CART_ITEMS_COOKIE = 'cart_items'
-
-/**
- * Reads the `cart_items` cookie and resolves it to real product records with quantities.
- *
- * Format: "name:qty,name:qty,...". If qty is omitted, defaults to 1.
- * Items with qty <= 0 are filtered out. Duplicates are deduplicated (last qty wins).
- *
- * There is intentionally NO default: the cookie is assumed to be provided by
- * the storefront. When it's missing or empty, the cart is genuinely empty and
- * we return an empty array so callers can render the empty-cart experience.
- */
-export async function getCartProducts(): Promise<Product[]> {
-  const cookieStore = await cookies()
-  const raw = cookieStore.get(CART_ITEMS_COOKIE)?.value
-  if (!raw) return []
-
-  const itemMap = new Map<ProductKey, number>()
-
-  raw
-    .split(',')
-    .map((item) => item.trim())
-    .forEach((item) => {
-      const [key, qtyStr] = item.split(':')
-      const cleanKey = key.trim()
-      if (cleanKey in PRODUCTS) {
-        const qty = qtyStr ? Number.parseInt(qtyStr, 10) : 1
-        const validQty = Number.isNaN(qty) || qty <= 0 ? 1 : qty
-        itemMap.set(cleanKey as ProductKey, validQty)
-      }
+function productsFromRecord(cart: CartRecord): Product[] {
+  return Object.entries(cart.items)
+    .filter(([, qty]) => qty > 0)
+    .flatMap(([key, quantity]) => {
+      if (!(key in PRODUCTS)) return []
+      return [{ ...PRODUCTS[key as ProductKey], quantity }]
     })
-
-  return Array.from(itemMap.entries()).map(([key, quantity]) => ({
-    ...PRODUCTS[key],
-    quantity,
-  }))
 }
 
 /**
- * Guard for every checkout page EXCEPT the cart itself: if the cart is empty
- * (no `cart_items` cookie), there is nothing to check out, so send the visitor
- * to /cart where the empty-cart experience is shown.
+ * Loads cart line items from Upstash Redis using the `cart_id` cookie.
+ * When the cookie or stored cart is missing, the cart is empty.
+ */
+export async function getCartProducts(): Promise<Product[]> {
+  const { cart } = await loadCartForVisitor()
+  return productsFromRecord(cart)
+}
+
+/**
+ * Guard for every checkout page EXCEPT the cart itself: if the cart is empty,
+ * there is nothing to check out, so send the visitor to /cart where the
+ * empty-cart experience is shown.
  */
 export async function requireCart(): Promise<Product[]> {
   const products = await getCartProducts()
@@ -192,13 +180,13 @@ export const STEPS: Step[] = [
 /** Level of the terminal order-complete page (one beyond the last stepper step). */
 export const ORDER_COMPLETE_LEVEL = STEPS.length // 3
 
-export const PROGRESS_COOKIE = 'cart_progress'
-
 /** Highest step index the visitor has unlocked (defaults to the cart page). */
 export async function getProgress(): Promise<number> {
-  const cookieStore = await cookies()
-  const raw = cookieStore.get(PROGRESS_COOKIE)?.value
-  const value = raw ? Number.parseInt(raw, 10) : 0
+  const cartId = await getCartId()
+  if (!cartId) return 0
+
+  const cart = await loadCart(cartId)
+  const value = cart?.progress ?? 0
   if (Number.isNaN(value) || value < 0) return 0
   return Math.min(value, ORDER_COMPLETE_LEVEL)
 }
@@ -248,55 +236,38 @@ export async function requireStepPayment(): Promise<number> {
   return guardStep(2)
 }
 
-/** Advances progress to at least `stepIndex` and stores it in the cookie. */
+/** Advances progress to at least `stepIndex` and stores it in Redis. */
 export async function advanceProgress(stepIndex: number): Promise<void> {
-  const cookieStore = await cookies()
-  const current = await getProgress()
-  const next = Math.max(current, stepIndex)
-  cookieStore.set(PROGRESS_COOKIE, String(next), {
-    path: '/cart',
-    httpOnly: true,
-    sameSite: 'lax',
-  })
+  const cartId = await getCartId()
+  if (!cartId) return
+
+  const cart = (await loadCart(cartId)) ?? { items: {}, progress: 0 }
+  cart.progress = Math.max(cart.progress, stepIndex)
+  await saveCart(cartId, cart)
 }
 
 /* -------------------------------------------------------------------------- */
 /*  Cart quantity updates                                                     */
 /* -------------------------------------------------------------------------- */
 
-/** Serializes the cart items to the cookie format: "key:qty,key:qty,..." */
-function serializeCart(items: Map<ProductKey, number>): string {
-  return Array.from(items.entries())
-    .filter(([, qty]) => qty > 0)
-    .map(([key, qty]) => (qty === 1 ? key : `${key}:${qty}`))
-    .join(',')
-}
-
 /**
  * Updates the quantity of a product in the cart.
  * If qty becomes <= 0, the item is removed from the cart.
- * Returns the updated cart string for the cookie.
  */
 export async function updateCartItemQuantity(
   productKey: ProductKey,
-  newQuantity: number
-): Promise<string> {
-  const products = await getCartProducts()
-  const itemMap = new Map(products.map((p) => [p.key, p.quantity]))
+  newQuantity: number,
+): Promise<void> {
+  const cartId = await getCartId()
+  if (!cartId) return
+
+  const cart = (await loadCart(cartId)) ?? { items: {}, progress: 0 }
 
   if (newQuantity <= 0) {
-    itemMap.delete(productKey)
+    delete cart.items[productKey]
   } else {
-    itemMap.set(productKey, newQuantity)
+    cart.items[productKey] = newQuantity
   }
 
-  const cartString = serializeCart(itemMap)
-  const cookieStore = await cookies()
-  cookieStore.set(CART_ITEMS_COOKIE, cartString, {
-    path: '/cart',
-    sameSite: 'lax',
-    maxAge: 60 * 60 * 24 * 7,
-  })
-
-  return cartString
+  await saveCart(cartId, cart)
 }

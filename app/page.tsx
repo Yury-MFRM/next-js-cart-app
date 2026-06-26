@@ -9,7 +9,7 @@ import { proceedToCheckout } from './actions'
 export default async function CartPage() {
   const products = await getCartProducts()
 
-  // No cart cookie / empty cart: show the empty-cart experience with no stepper
+  // No cart id / empty cart: show the empty-cart experience with no stepper
   // and a single link back to the storefront home.
   if (products.length === 0) {
     return (
