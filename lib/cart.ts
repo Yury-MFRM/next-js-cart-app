@@ -160,11 +160,14 @@ export function absoluteUrl(origin: string, path: string): string {
  */
 export async function cartUrl(step: string): Promise<string> {
   const origin = await getCdnOrigin()
+  console.log('origin', origin,'step', step,'BASE_PATH', BASE_PATH)
   // No origin header (rare): return the bare step so redirect() prepends the
   // basePath itself — avoids a double `/cart/cart` prefix.
-  if (!origin) return step
-  const path = step === '/' ? BASE_PATH : `${BASE_PATH}${step}`
-  return `${origin}${path}`
+  return step;
+  // FIXME: this is a temporary test of the cart to work without the origin header
+  // if (!origin) return step
+  // const path = step === '/' ? BASE_PATH : `${BASE_PATH}${step}`
+  // return `${origin}${path}`
 }
 
 /* -------------------------------------------------------------------------- */

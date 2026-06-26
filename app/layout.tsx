@@ -3,7 +3,9 @@ import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import localFont from 'next/font/local'
 import { assetPath } from '@/lib/paths'
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import './globals.css'
+import { hasFeature } from '@/lib/app-feature'
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
 const geistMono = Geist_Mono({
@@ -74,11 +76,18 @@ export const viewport: Viewport = {
   ],
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const [
+    noSpeed,
+    noAnalytics,
+  ] = await hasFeature(
+    "no-speed",
+    "no-analitics",
+  );
   return (
     <html
       lang="en"
@@ -86,7 +95,10 @@ export default function RootLayout({
     >
       <body className="font-sans antialiased">
         {children}
-        {process.env.NODE_ENV === 'production' && <Analytics />}
+        {!noAnalytics && <Analytics />}
+        {!noSpeed && (
+          <SpeedInsights />
+        )}
       </body>
     </html>
   )
