@@ -3,7 +3,12 @@
 // The host of the storefront this cart sub-web is mounted in front of.
 const STOREFRONT_ORIGIN = 'https://browse-flax.vercel.app'
 
+const BUILD_TIME = new Date().toISOString()
+
 const nextConfig = {
+  env: {
+    NEXT_PUBLIC_BUILD_TIME: BUILD_TIME,
+  },
   typescript: {
     ignoreBuildErrors: true,
   },

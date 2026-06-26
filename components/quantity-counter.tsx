@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { Icon } from '@/components/icon'
+import { notifyCartUpdated } from '@/components/storefront/cart-badge'
 import { updateItemQuantity } from '@/app/actions'
 import { type ProductKey } from '@/lib/cart'
 
@@ -25,6 +26,7 @@ export function QuantityCounter({
 
     startTransition(async () => {
       await updateItemQuantity(productKey, newQuantity)
+      notifyCartUpdated()
     })
   }
 

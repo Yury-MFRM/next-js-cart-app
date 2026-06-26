@@ -2,7 +2,7 @@ import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { BASE_PATH } from '@/lib/paths'
 
-export { BASE_PATH, assetPath } from '@/lib/paths'
+export { BASE_PATH, assetPath, apiPath } from '@/lib/paths'
 
 /* -------------------------------------------------------------------------- */
 /*  Products                                                                  */

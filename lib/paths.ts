@@ -6,3 +6,8 @@ export function assetPath(path: string): string {
   const normalized = path.startsWith('/') ? path : `/${path}`
   return `${BASE_PATH}${normalized}`
 }
+
+/** Builds a path to an API route (includes the basePath prefix). */
+export function apiPath(path: string): string {
+  return assetPath(path)
+}
