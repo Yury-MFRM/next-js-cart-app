@@ -11,6 +11,9 @@ const ICONS = {
   'credit-card': 'credit-card',
   lock: 'lock',
   'loader-2': 'loader-2',
+  menu: 'menu',
+  search: 'search',
+  x: 'x',
 } as const
 
 export type IconName = keyof typeof ICONS

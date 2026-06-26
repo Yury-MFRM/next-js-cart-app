@@ -6,6 +6,9 @@ import { assetPath } from '@/lib/paths'
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import './globals.css'
 import { hasFeature } from '@/lib/app-feature'
+import { headers } from "next/headers";
+import { Tracking } from '@/components/logging'
+import { headersMap } from '@/lib/server-context'
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
 const geistMono = Geist_Mono({
@@ -78,9 +81,12 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({
   children,
+  header,
 }: Readonly<{
   children: React.ReactNode
+  header: React.ReactNode
 }>) {
+  const info = headersMap(await headers());
   const [
     noSpeed,
     noAnalytics,
@@ -94,12 +100,14 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${rubik.variable} bg-background`}
     >
       <body className="font-sans antialiased">
+        {header}
         {children}
         {!noAnalytics && <Analytics />}
         {!noSpeed && (
           <SpeedInsights />
         )}
       </body>
+      <Tracking info={info} />
     </html>
   )
 }

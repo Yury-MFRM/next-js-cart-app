@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { headersMap } from './lib/server-context';
 
 const VISITOR_COOKIE = 'visitor_id'
-
+const USE_DEBUG_COOKIE = 'use_debug'
 /**
  * Edge proxy that runs in front of the /cart sub-web.
  *
@@ -14,6 +15,16 @@ const VISITOR_COOKIE = 'visitor_id'
  *     components read it to build absolute links to product pages/images.
  */
 export function proxy(request: NextRequest) {
+  const url = request.nextUrl;
+  const isDebug = request.cookies.get(USE_DEBUG_COOKIE)?.value == "true";
+  isDebug &&
+      console.debug(
+        "Checking url",
+        request.headers.get("forwarded-host"),
+        url,
+        headersMap(request.headers)
+      );
+
   // Forward the original request headers, augmented with the resolved
   // user-facing origin so Server Components can read it via `headers()`.
   const requestHeaders = new Headers(request.headers)
