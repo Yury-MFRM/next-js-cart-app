@@ -14,7 +14,7 @@ export type FeatureFlag =
 // getFeatureFlagByName
 export const listFeatures = React.cache(async () => {
   const overrides = (
-    (await cookies()).get(USE_FEATURE_COOKIE)?.value || ""
+    (await cookies().catch()).get(USE_FEATURE_COOKIE)?.value || ""
   ).split(",");
 
   const settings = await get("dynamicFeatureFlags");
