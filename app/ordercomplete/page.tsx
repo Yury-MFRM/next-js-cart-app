@@ -1,4 +1,4 @@
-import { CheckCircle2 } from 'lucide-react'
+import { Icon } from '@/components/icon'
 import { buttonVariants } from '@/components/ui/button'
 import { guardStep, ORDER_COMPLETE_LEVEL, requireCart } from '@/lib/cart'
 
@@ -11,7 +11,7 @@ export default async function OrderCompletePage() {
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-12">
       <div className="flex flex-col items-center rounded-lg border border-border bg-card px-6 py-12 text-center">
-        <CheckCircle2 className="mb-4 h-12 w-12 text-primary" aria-hidden="true" />
+        <Icon name="check-circle-2" className="mb-4 h-12 w-12 text-primary" />
         <h1 className="mb-2 text-2xl font-semibold tracking-tight text-balance">
           Order complete
         </h1>

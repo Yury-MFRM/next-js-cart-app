@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Check } from 'lucide-react'
+import { Icon } from '@/components/icon'
 import { STEPS } from '@/lib/cart'
 import { cn } from '@/lib/utils'
 
@@ -39,7 +39,7 @@ export function Stepper({ current, progress }: StepperProps) {
               )}
             >
               {isComplete ? (
-                <Check className="h-4 w-4" aria-hidden="true" />
+                <Icon name="check" className="h-4 w-4" />
               ) : (
                 index + 1
               )}

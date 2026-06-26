@@ -1,5 +1,6 @@
 import {
   absoluteUrl,
+  assetPath,
   formatMoney,
   getCartProducts,
   getCdnOrigin,
@@ -39,7 +40,7 @@ function CartRow({ product, origin }: { product: Product; origin: string }) {
         {/* Absolute, CDN-resolved image. crossOrigin not needed (plain img). */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={imageUrl || '/placeholder.svg'}
+          src={imageUrl || assetPath('/icons/placeholder.svg')}
           alt={product.name}
           width={72}
           height={72}

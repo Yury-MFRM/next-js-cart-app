@@ -1,5 +1,8 @@
 import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { BASE_PATH } from '@/lib/paths'
+
+export { BASE_PATH, assetPath } from '@/lib/paths'
 
 /* -------------------------------------------------------------------------- */
 /*  Products                                                                  */
@@ -143,9 +146,6 @@ export function absoluteUrl(origin: string, path: string): string {
   if (!origin) return path
   return `${origin}${path.startsWith('/') ? '' : '/'}${path}`
 }
-
-/** The basePath this sub-web is mounted at (kept in sync with next.config). */
-export const BASE_PATH = '/cart'
 
 /**
  * Builds an absolute, user-facing URL to a page INSIDE this /cart sub-web.
