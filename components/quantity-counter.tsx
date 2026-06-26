@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Trash2, Plus, Minus } from 'lucide-react'
+import { Icon } from '@/components/icon'
 import { updateItemQuantity } from '@/app/actions'
 import { type ProductKey } from '@/lib/cart'
 
@@ -55,9 +55,9 @@ export function QuantityCounter({
         aria-label={quantity === 1 ? 'Remove item' : 'Decrease quantity'}
       >
         {quantity === 1 ? (
-          <Trash2 className="h-4 w-4 text-foreground" />
+          <Icon name="trash-2" className="h-4 w-4 text-foreground" />
         ) : (
-          <Minus className="h-4 w-4 text-foreground" />
+          <Icon name="minus" className="h-4 w-4 text-foreground" />
         )}
       </button>
 
@@ -71,7 +71,7 @@ export function QuantityCounter({
         className="inline-flex h-8 w-8 items-center justify-center rounded border border-border bg-background hover:bg-muted disabled:opacity-50"
         aria-label="Increase quantity"
       >
-        <Plus className="h-4 w-4 text-foreground" />
+        <Icon name="plus" className="h-4 w-4 text-foreground" />
       </button>
     </div>
   )

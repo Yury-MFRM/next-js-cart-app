@@ -1,7 +1,7 @@
 'use client'
 
 import { useFormStatus } from 'react-dom'
-import { Loader2 } from 'lucide-react'
+import { Icon } from '@/components/icon'
 import { Button } from '@/components/ui/button'
 
 /**
@@ -14,7 +14,7 @@ export function SubmitButton({ children }: { children: React.ReactNode }) {
 
   return (
     <Button type="submit" size="lg" disabled={pending} aria-busy={pending}>
-      {pending && <Loader2 className="animate-spin" aria-hidden="true" />}
+      {pending && <Icon name="loader-2" className="size-4 animate-spin" />}
       {pending ? 'Processing…' : children}
     </Button>
   )

@@ -1,4 +1,4 @@
-import { CreditCard, Lock } from 'lucide-react'
+import { Icon } from '@/components/icon'
 
 /**
  * Simulated payment widget rendered standalone so it can be embedded in an
@@ -11,11 +11,11 @@ export default function PaymentFrame() {
     <div className="flex min-h-svh flex-col gap-4 bg-muted/40 p-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <CreditCard className="h-4 w-4" aria-hidden="true" />
+          <Icon name="credit-card" className="h-4 w-4" />
           Card details
         </div>
         <span className="flex items-center gap-1 text-xs text-muted-foreground">
-          <Lock className="h-3 w-3" aria-hidden="true" />
+          <Icon name="lock" className="h-3 w-3" />
           Secure (simulated)
         </span>
       </div>

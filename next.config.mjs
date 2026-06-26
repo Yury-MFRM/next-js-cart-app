@@ -12,6 +12,29 @@ const nextConfig = {
   },
   // This app is a "sub-web": it owns every route under /cart and nothing else.
   basePath: '/cart',
+  // NOTE: if we need to update cached assets, we can change the URL to include a version, ex: /cart/v2/style.css.
+  async headers() {
+    return [
+      {
+        source: "/fonts/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/icons/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
+  },
   async rewrites() {
     return {
       // `fallback` rewrites only run when a request did NOT match any route
@@ -28,6 +51,15 @@ const nextConfig = {
         },
       ],
     }
+  },
+  experimental: {
+    serverActions: {
+      allowedOrigins: [
+        "*.vercel.app",
+        "mattressfirm.com",
+        "*.mattressfirm.com",
+      ],
+    },
   },
 }
 
