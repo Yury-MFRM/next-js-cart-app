@@ -20,9 +20,7 @@ export function proxy(request: NextRequest) {
   const url = request.nextUrl;
   const requestHeaders = setupGeoHeaders(setupHeaders(request));
 
-  const isDebug = request.cookies.get(USE_DEBUG_COOKIE)?.value == "true";
-  isDebug &&
-      console.log(
+  console.log(
         "Checking url",
         requestHeaders.get("forwarded-host"),
         url,
