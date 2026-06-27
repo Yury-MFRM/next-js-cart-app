@@ -13,9 +13,13 @@ export type FeatureFlag =
 
 // getFeatureFlagByName
 export const listFeatures = React.cache(async () => {
-  const overrides = (
-    (await cookies().catch()).get(USE_FEATURE_COOKIE)?.value || ""
-  ).split(",");
+  let overrides: string[] = [];
+  try {
+    const cookieStore = await cookies();
+    overrides = (cookieStore.get(USE_FEATURE_COOKIE)?.value ?? "").split(",");
+  } catch {
+    // cookies() is unavailable during static generation at build time
+  }
 
   const settings = await get("dynamicFeatureFlags");
   console.debug("listFeatures", settings);

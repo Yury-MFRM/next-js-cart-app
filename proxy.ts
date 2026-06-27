@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { headersMap } from './lib/server-context';
+import { setupHeaders } from './lib/vendor/agent-headers';
+import { setupGeoHeaders } from './lib/vendor/geo-headers';
 
 const VISITOR_COOKIE = 'visitor_id'
 const USE_DEBUG_COOKIE = 'use_debug'
@@ -16,18 +18,19 @@ const USE_DEBUG_COOKIE = 'use_debug'
  */
 export function proxy(request: NextRequest) {
   const url = request.nextUrl;
+  const requestHeaders = setupGeoHeaders(setupHeaders(request), false);
+
   const isDebug = request.cookies.get(USE_DEBUG_COOKIE)?.value == "true";
   isDebug &&
       console.debug(
         "Checking url",
-        request.headers.get("forwarded-host"),
+        requestHeaders.get("forwarded-host"),
         url,
-        headersMap(request.headers)
+        headersMap(requestHeaders)
       );
 
   // Forward the original request headers, augmented with the resolved
   // user-facing origin so Server Components can read it via `headers()`.
-  const requestHeaders = new Headers(request.headers)
 
   // When deployed behind Cloudflare, the public host/proto arrive as
   // x-forwarded-* headers. Fall back to the request URL for local dev.
@@ -47,6 +50,7 @@ export function proxy(request: NextRequest) {
   // instead of only on the visitor's next request.
   const existingVisitorId = request.cookies.get(VISITOR_COOKIE)?.value
   const visitorId = existingVisitorId ?? crypto.randomUUID()
+  const requestId = requestHeaders.get("x-request-id");
 
   if (!existingVisitorId) {
     request.cookies.set(VISITOR_COOKIE, visitorId)
@@ -65,6 +69,13 @@ export function proxy(request: NextRequest) {
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 365,
     })
+  }
+
+  if (
+    requestId &&
+    (url.pathname.includes("/error") || response.status >= 400)
+  ) {
+    response.cookies.set("x-request-id", requestId);
   }
 
   return response
