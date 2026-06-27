@@ -14,7 +14,6 @@ export const REAL_IP = "true-client-ip"; // Cloudflare, value for "x-real-ip" Ve
 export const FORWARDED_HOST = "forwarded-host"; // Cloudflare, value for "x-forwarded-host" Vercel
 export function setupHeaders(request: NextRequest): Headers {
   const headers = new Headers(request.headers);
-  /**
   const agent = userAgent(request);
   headers.set("x-url", request.url);
   headers.set("x-0-pathname", request.nextUrl.pathname);
@@ -48,6 +47,8 @@ export function setupHeaders(request: NextRequest): Headers {
       agent.device.vendor === "Android" || process.env.IS_ANDROID! === "true"
     ).toString(),
   );
+   
+  /**
   // Try Cloud Flare first then backoff to Vercel, then fall back to standard
   const clientIp =
     headers.get(REAL_IP) ||
