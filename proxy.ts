@@ -5,7 +5,7 @@ import { setupHeaders } from './lib/vendor/agent-headers';
 import { setupGeoHeaders } from './lib/vendor/geo-headers';
 
 const VISITOR_COOKIE = 'visitor_id'
-const USE_DEBUG_COOKIE = 'use_debug'
+
 /**
  * Edge proxy that runs in front of the /cart sub-web.
  *
@@ -23,7 +23,7 @@ export function proxy(request: NextRequest) {
   console.log(
         "Checking url",
         requestHeaders.get("forwarded-host"),
-        url,
+        url.href,
         headersMap(requestHeaders)
       );
 
