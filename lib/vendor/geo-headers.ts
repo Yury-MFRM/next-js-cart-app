@@ -22,10 +22,12 @@ export function setupGeoHeaders(
   headers: Headers,
 ): Headers {
   // This is Vercel geo headers, or fallback to the edge of the CDN if not available plus local env variable
-  // Object.entries(GEO).forEach(([key, value]) => {
-  //   const vercel = headers.get(value[1]);
-  //   headers.set(geoKey(key), vercel || process.env[key] || "");
-  // });
+  /**
+  Object.entries(GEO).forEach(([key, value]) => {
+    const vercel = headers.get(value[1]);
+    headers.set(geoKey(key), vercel || process.env[key] || "");
+  });
+  */
   return headers;
 }
 

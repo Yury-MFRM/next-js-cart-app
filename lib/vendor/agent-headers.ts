@@ -14,6 +14,7 @@ export const REAL_IP = "true-client-ip"; // Cloudflare, value for "x-real-ip" Ve
 export const FORWARDED_HOST = "forwarded-host"; // Cloudflare, value for "x-forwarded-host" Vercel
 export function setupHeaders(request: NextRequest): Headers {
   const headers = new Headers(request.headers);
+  /**
   const agent = userAgent(request);
   headers.set("x-url", request.url);
   headers.set("x-0-pathname", request.nextUrl.pathname);
@@ -74,11 +75,12 @@ export function setupHeaders(request: NextRequest): Headers {
     headers.get(FORWARDED_HOST) || headers.get("x-forwarded-host") || "",
   );
   if(!headers.get("x-forwarded-port") && headers.get("x-forwarded-host")) {
-    console.log("Setting x-forwarded-proto from x-forwarded-host", headers.get("x-forwarded-host"));
+    console.log("NOT Setting x-forwarded-proto from x-forwarded-host", headers.get("x-forwarded-host"));
     // headers.set(
     //   "x-forwarded-proto",
     //   headers.get("x-forwarded-port") == "443" ? "https" : "http",
     // );
   }
+  */
   return headers;
 }
