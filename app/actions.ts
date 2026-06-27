@@ -1,5 +1,6 @@
 'use server'
 
+import { refresh } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { advanceProgress, cartUrl, type ProductKey, updateCartItemQuantity } from '@/lib/cart'
 
@@ -26,4 +27,5 @@ export async function submitOrder() {
 
 export async function updateItemQuantity(productKey: ProductKey, quantity: number): Promise<void> {
   await updateCartItemQuantity(productKey, quantity)
+  refresh()
 }
