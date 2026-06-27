@@ -77,7 +77,6 @@ export function setupHeaders(request: NextRequest): Headers {
     "x-0-forwarded-host",
     headers.get(FORWARDED_HOST) || headers.get("x-forwarded-host") || "",
   );
-  */
   if(!headers.get("x-forwarded-port") && headers.get("x-forwarded-host")) {
     console.log("NOT Setting x-forwarded-proto from x-forwarded-host", headers.get("x-forwarded-host"));
     // headers.set(
@@ -85,5 +84,6 @@ export function setupHeaders(request: NextRequest): Headers {
     //   headers.get("x-forwarded-port") == "443" ? "https" : "http",
     // );
   }
+  */
   return headers;
 }
