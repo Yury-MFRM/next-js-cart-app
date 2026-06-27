@@ -60,9 +60,12 @@ export function setupHeaders(request: NextRequest): Headers {
 
   const requestId = headers.get("x-request-id");
   if (requestId) {
+    console.log("Dubling request id", requestId);
     headers.set("x-0-request-id", requestId);
+  } else {
+    console.log("No request id found in headers", headers);
+    headers.set("x-request-id", headers.get("x-vercel-id") || requestId || "");
   }
-  headers.set("x-request-id", headers.get("x-vercel-id") || requestId || "");
   headers.set("x-0-version", buildInfoString);
   // Special header from CDN to get the original host name.
   // BUG #142760: Vercel does not allow overwriting the forwarded-host, will use fallback value
@@ -70,9 +73,12 @@ export function setupHeaders(request: NextRequest): Headers {
     "x-0-forwarded-host",
     headers.get(FORWARDED_HOST) || headers.get("x-forwarded-host") || "",
   );
-  headers.set(
-    "x-forwarded-proto",
-    headers.get("x-forwarded-port") == "443" ? "https" : "http",
-  );
+  if(!headers.get("x-forwarded-port") && headers.get("x-forwarded-host")) {
+    console.log("Setting x-forwarded-proto from x-forwarded-host", headers.get("x-forwarded-host"));
+    headers.set(
+      "x-forwarded-proto",
+      headers.get("x-forwarded-port") == "443" ? "https" : "http",
+    );
+  }
   return headers;
 }

@@ -18,7 +18,7 @@ const USE_DEBUG_COOKIE = 'use_debug'
  */
 export function proxy(request: NextRequest) {
   const url = request.nextUrl;
-  const requestHeaders = setupGeoHeaders(setupHeaders(request), false);
+  const requestHeaders = setupGeoHeaders(setupHeaders(request));
 
   const isDebug = request.cookies.get(USE_DEBUG_COOKIE)?.value == "true";
   isDebug &&
