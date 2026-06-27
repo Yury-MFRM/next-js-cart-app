@@ -9,7 +9,7 @@ import {
   type CartRecord,
 } from '@/lib/cart-store'
 
-export { BASE_PATH, assetPath, apiPath } from '@/lib/paths'
+export { BASE_PATH, assetPath } from '@/lib/paths'
 export { CART_ID_COOKIE } from '@/lib/cart-store'
 
 /* -------------------------------------------------------------------------- */

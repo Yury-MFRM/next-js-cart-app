@@ -1,5 +1,4 @@
 import { PRODUCTS } from '@/lib/cart'
-import { apiPath } from '@/lib/paths'
 import type { StorefrontChromeConfig } from '@/components/storefront/types'
 
 /** Default storefront chrome config for the /cart sub-web. */
@@ -7,7 +6,7 @@ export const CART_APP_CHROME_CONFIG: StorefrontChromeConfig = {
   brandLabel: 'Browse',
   brandHref: '/',
   cartHref: '/',
-  cartCountApiPath: apiPath('/api/cart'),
+  cartCountApiPath: '/api/cart',
   navLinks: [
     { label: 'Home', href: '/' },
     { label: 'Wireless Headphones', href: '/headphones' },

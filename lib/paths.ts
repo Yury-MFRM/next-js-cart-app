@@ -7,7 +7,4 @@ export function assetPath(path: string): string {
   return `${BASE_PATH}${normalized}`
 }
 
-/** Builds a path to an API route (includes the basePath prefix). */
-export function apiPath(path: string): string {
-  return assetPath(path)
-}
+
