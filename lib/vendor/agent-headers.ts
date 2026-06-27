@@ -48,7 +48,6 @@ export function setupHeaders(request: NextRequest): Headers {
     ).toString(),
   );
    
-  /**
   // Try Cloud Flare first then backoff to Vercel, then fall back to standard
   const clientIp =
     headers.get(REAL_IP) ||
@@ -68,6 +67,9 @@ export function setupHeaders(request: NextRequest): Headers {
     console.log("No request id found in headers", headers);
     headers.set("x-request-id", headers.get("x-vercel-id") || requestId || "");
   }
+  console.log("requestId", requestId);
+  /**
+
   headers.set("x-0-version", buildInfoString);
   // Special header from CDN to get the original host name.
   // BUG #142760: Vercel does not allow overwriting the forwarded-host, will use fallback value
