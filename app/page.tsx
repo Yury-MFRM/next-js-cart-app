@@ -4,9 +4,10 @@ import { OrderSummary } from '@/components/order-summary'
 import { Stepper } from '@/components/stepper'
 import { SubmitButton } from '@/components/submit-button'
 import { getCartProducts, requireStepCart } from '@/lib/cart'
-import { proceedToCheckout } from './actions'
+import { logMiddleware, proceedToCheckout } from './actions'
 
 export default async function CartPage() {
+  await logMiddleware("CartPage");
   const products = await getCartProducts()
 
   // No cart id / empty cart: show the empty-cart experience with no stepper

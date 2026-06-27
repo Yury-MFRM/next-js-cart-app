@@ -1,3 +1,4 @@
+import { logMiddleware } from '@/app/actions';
 import { Icon } from '@/components/icon'
 
 /**
@@ -6,7 +7,8 @@ import { Icon } from '@/components/icon'
  * provider). Purely visual — nothing is submitted or processed here; the real
  * "Submit order" button lives on the parent page.
  */
-export default function PaymentFrame() {
+export default async function PaymentFrame() {
+  await logMiddleware("PaymentFrame");
   return (
     <div className="flex min-h-svh flex-col gap-4 bg-muted/40 p-5">
       <div className="flex items-center justify-between">

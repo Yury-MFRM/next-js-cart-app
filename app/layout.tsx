@@ -9,6 +9,7 @@ import { hasFeature } from '@/lib/app-feature'
 import { headers } from "next/headers";
 import { Tracking } from '@/components/logging'
 import { headersMap } from '@/lib/server-context'
+import { logMiddleware } from './actions'
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
 const geistMono = Geist_Mono({
@@ -86,6 +87,7 @@ export default async function RootLayout({
   children: React.ReactNode
   header: React.ReactNode
 }>) {
+  await logMiddleware("RootLayout");
   const info = headersMap(await headers());
   const [
     noSpeed,

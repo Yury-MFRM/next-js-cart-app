@@ -1,8 +1,10 @@
 import { Icon } from '@/components/icon'
 import { buttonVariants } from '@/components/ui/button'
 import { guardStep, ORDER_COMPLETE_LEVEL, requireCart } from '@/lib/cart'
+import { logMiddleware } from '../actions';
 
 export default async function OrderCompletePage() {
+  await logMiddleware("OrderCompletePage");
   // Guard: cart must exist, and visitor must have completed the full flow
   // (payment submitted). This is the terminal page with no stepper.
   await requireCart()

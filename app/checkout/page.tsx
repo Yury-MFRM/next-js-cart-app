@@ -3,9 +3,10 @@ import { OrderSummary } from '@/components/order-summary'
 import { Stepper } from '@/components/stepper'
 import { SubmitButton } from '@/components/submit-button'
 import { requireStepCheckout } from '@/lib/cart'
-import { proceedToPayment } from '../actions'
+import { logMiddleware, proceedToPayment } from '../actions'
 
 export default async function CheckoutPage() {
+  await logMiddleware("CheckoutPage");
   // Guard: cart must exist and visitor must have reached this step via normal flow.
   const progress = await requireStepCheckout()
 
