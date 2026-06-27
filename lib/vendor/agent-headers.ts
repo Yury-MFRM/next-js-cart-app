@@ -72,11 +72,11 @@ export function setupHeaders(request: NextRequest): Headers {
   headers.set("x-0-version", buildInfoString);
   // Special header from CDN to get the original host name.
   // BUG #142760: Vercel does not allow overwriting the forwarded-host, will use fallback value
+  /**
   headers.set(
     "x-0-forwarded-host",
     headers.get(FORWARDED_HOST) || headers.get("x-forwarded-host") || "",
   );
-  /**
   if(!headers.get("x-forwarded-port") && headers.get("x-forwarded-host")) {
     console.log("NOT Setting x-forwarded-proto from x-forwarded-host", headers.get("x-forwarded-host"));
     // headers.set(

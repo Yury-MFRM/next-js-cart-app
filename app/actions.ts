@@ -38,17 +38,18 @@ export async function updateItemQuantity(productKey: ProductKey, quantity: numbe
 export async function logMiddleware(message: string) {
   const cookieStore = await cookies();
   const headerStore = await headers();
-  console.log("ECID", cookieStore.get("ECID"));
-  console.log("message", message, "called from", new Error().stack);
-  console.log("x-cdn-url", headerStore.get("x-cdn-url"));
-  console.log("x-0-browser", headerStore.get("x-0-browser"));
-  console.log("x-cdn-url", headerStore.get("x-cdn-url"));
-  console.log("x-0-request-id", headerStore.get("x-0-request-id"));
-  console.log("x-0-version", headerStore.get("x-0-version"));
-  console.log("x-0-forwarded-host", headerStore.get("x-0-forwarded-host"));
-  console.log("x-0-client-ip", headerStore.get("x-0-client-ip"));
-  console.log("x-0-is-smartphone", headerStore.get("x-0-is-smartphone"));
-  console.log("x-0-is-tablet", headerStore.get("x-0-is-tablet"));
-  console.log("x-0-is-ios", headerStore.get("x-0-is-ios"));
-  console.log("x-0-is-android", headerStore.get("x-0-is-android"));
+  const text = `Middleware from ${message}:
+    ECID: ${cookieStore.get("ECID")}
+    x-cdn-url: ${headerStore.get("x-cdn-url")}
+    x-0-browser: ${headerStore.get("x-0-browser")}
+    x-0-request-id: ${headerStore.get("x-0-request-id")}
+    x-0-version: ${headerStore.get("x-0-version")}
+    x-0-forwarded-host: ${headerStore.get("x-0-forwarded-host")}
+    x-0-client-ip: ${headerStore.get("x-0-client-ip")}
+    x-0-is-smartphone: ${headerStore.get("x-0-is-smartphone")}
+    x-0-is-tablet: ${headerStore.get("x-0-is-tablet")}
+    x-0-is-ios: ${headerStore.get("x-0-is-ios")}
+    x-0-is-android: ${headerStore.get("x-0-is-android")}
+  `;
+  console.log(text);
 }
