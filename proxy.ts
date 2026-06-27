@@ -22,7 +22,7 @@ export function proxy(request: NextRequest) {
 
   const isDebug = request.cookies.get(USE_DEBUG_COOKIE)?.value == "true";
   isDebug &&
-      console.debug(
+      console.log(
         "Checking url",
         requestHeaders.get("forwarded-host"),
         url,
