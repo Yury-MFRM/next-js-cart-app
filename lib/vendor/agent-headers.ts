@@ -59,24 +59,24 @@ export function setupHeaders(request: NextRequest): Headers {
     console.error("No client ip found in headers");
   }
   const requestId = headers.get("x-request-id");
-/*
+
   if (requestId) {
     console.log("Dubling request id", requestId);
     headers.set("x-0-request-id", requestId);
   } else {
-    console.log("No request id found in headers", headers);
-    headers.set("x-request-id", headers.get("x-vercel-id") || requestId || "");
+    console.warn("No request id found in headers", headers);
+    // headers.set("x-request-id", headers.get("x-vercel-id") || requestId || "");
   }
-*/
+
   console.log("requestId", requestId);
   headers.set("x-0-version", buildInfoString);
   // Special header from CDN to get the original host name.
   // BUG #142760: Vercel does not allow overwriting the forwarded-host, will use fallback value
-  /**
   headers.set(
     "x-0-forwarded-host",
     headers.get(FORWARDED_HOST) || headers.get("x-forwarded-host") || "",
   );
+  /**
   if(!headers.get("x-forwarded-port") && headers.get("x-forwarded-host")) {
     console.log("NOT Setting x-forwarded-proto from x-forwarded-host", headers.get("x-forwarded-host"));
     // headers.set(
